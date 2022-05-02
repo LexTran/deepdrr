@@ -108,8 +108,8 @@ class MobileCArm(object):
         isocenter (geo.Point3D): the initial isocenter of in the device frame. This is the point
             about which rotations are performed.
         isocenter_distance (float): the distance from the X-ray source to the isocenter of the CAarm. (The center of rotation).
-        alpha (float): initial LAO/RAO(左前斜位/右前斜位) angle of the C-Arm. alpha > 0 is in the RAO direction. This is the angle along arm of the C-arm.
-        beta (float): initial CRA/CAU(头位/足位) angulation of the C-arm. beta > 0 is in the CAU direction.
+        alpha (float): initial LAO/RAO angle of the C-Arm. alpha > 0 is in the RAO direction. This is the angle along arm of the C-arm.
+        beta (float): initial CRA/CAU angulation of the C-arm. beta > 0 is in the CAU direction.
         degrees (bool, optional): Whether given angles are in degrees. Defaults to False.
         camera_intrinsics: (Optional[Union[geo.CameraIntrinsicTransform, dict]], optional): either a CameraIntrinsicTransform instance or kwargs for CameraIntrinsicTransform.from_sizes
 
@@ -127,17 +127,17 @@ class MobileCArm(object):
         alpha: float = 0,
         beta: float = 0,
         degrees: bool = True,
-        horizontal_movement: float = 960,  # width of window in X and Y planes.
-        vertical_travel: float = 860,  # width of window in Z plane.
+        horizontal_movement: float = 200,  # width of window in X and Y planes.
+        vertical_travel: float = 430,  # width of window in Z plane.
         min_alpha: float = -40,
         max_alpha: float = 110,
         # note that this would collide with the patient. Suggested to limit to +/- 45
         min_beta: float = -225,
         max_beta: float = 225,
-        source_to_detector_distance: float = 1000,
+        source_to_detector_distance: float = 1020,
         # vertical component of the source point offset from the isocenter of rotation, in -Z. Previously called `isocenter_distance`
-        source_to_isocenter_vertical_distance: float = 500,
-        # horizontal offset of the principle ray from the isocenter of rotation, in +Y. Defaults to 0, but should be 200 in document.
+        source_to_isocenter_vertical_distance: float = 530,
+        # horizontal offset of the principle ray from the isocenter of rotation, in +Y. Defaults to 9, but should be 200 in document.
         source_to_isocenter_horizontal_offset: float = 0,
         # horizontal distance from principle ray to inner C-arm circumference. Used for visualization
         immersion_depth: float = 730,

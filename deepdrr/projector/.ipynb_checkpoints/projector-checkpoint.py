@@ -36,10 +36,13 @@ NUMBYTES_FLOAT32 = 4
 
 def _get_spectrum(spectrum: Union[np.ndarray, str]):
     """Get the data corresponding to the given spectrum name.
+
     Args:
         spectrum (Union[np.ndarray, str]): the spectrum array or the spectrum itself.
+
     Raises:
         TypeError: If the spectrum is not recognized.
+
     Returns:
         np.ndarray: The X-ray spectrum data.
     """
@@ -52,15 +55,20 @@ def _get_spectrum(spectrum: Union[np.ndarray, str]):
     else:
         raise TypeError(f"unrecognized spectrum type: {type(spectrum)}")
 
+
 def _get_kernel_projector_module(num_volumes: int, num_materials: int) -> SourceModule:
     """Compile the cuda code for the kernel projector.
+
     Assumes `project_kernel.cu`, `kernel_vol_seg_data.cu`, and `cubic` interpolation library is in the same directory as THIS
     file.
+
     Args:
         num_volumes (int): The number of volumes to assume
         num_materials (int): The number of materials to assume
+
     Returns:
         SourceModule: pycuda SourceModule object.
+
     """
     # path to files for cubic interpolation (folder cubic in DeepDRR)
     d = Path(__file__).resolve().parent
@@ -85,9 +93,12 @@ def _get_kernel_projector_module(num_volumes: int, num_materials: int) -> Source
         ],
     )
 
+
 def _get_kernel_scatter_module(num_materials) -> SourceModule:
     """Compile the cuda code for the scatter simulation.
+
     Assumes `scatter_kernel.cu` and `scatter_header.cu` are in the same directory as THIS file.
+
     Returns:
         SourceModule: pycuda SourceModule object.
     """
@@ -104,6 +115,7 @@ def _get_kernel_scatter_module(num_materials) -> SourceModule:
         no_extern_c=True,
         options=["-D", f"NUM_MATERIALS={num_materials}"],
     )
+
 
 class Projector(object):
     def __init__(
@@ -126,12 +138,14 @@ class Projector(object):
         intensity_upper_bound: Optional[float] = None,
     ) -> None:
         """Create the projector, which has info for simulating the DRR.
+
         Usage:
         ```
         with Projector(volume, materials, ...) as projector:
             for projection in projections:
                 yield projector(projection)
         ```
+
         Args:
             volume (Union[Volume, List[Volume]]): a volume object with materials segmented, or a list of volume objects.
             priorities (List[int], optional): Denotes the 'priority level' of the volumes in projection by assigning an integer rank to each volume. At each position, volumes with lower rankings are sampled from as long as they have a non-null segmentation at that location. Valid ranks are in the range [0, NUM_VOLUMES), with rank 0 having precedence over other ranks. Note that multiple volumes can share a rank. If a list of ranks is provided, the ranks are associated in-order to the provided volumes.  If no list is provided (the default), the volumes are assumed to have distinct ranks, and each volume has precedence over the preceding volumes. (This behavior is equivalent to passing in the list: [NUM_VOLUMES - 1, ..., 1, 0].)

@@ -7,7 +7,6 @@ from typing import Union, Tuple, List, Optional, Dict
 
 import logging
 import os
-import pdb
 import numpy as np
 from pathlib import Path
 import nibabel as nib
@@ -289,7 +288,6 @@ class Volume(object):
         hu_values = img.get_fdata()
 
         data = cls._convert_hounsfield_to_density(hu_values)
-        
         materials = cls.segment_materials(
             hu_values,
             use_thresholding=use_thresholding,
@@ -297,13 +295,6 @@ class Volume(object):
             cache_dir=cache_dir,
             prefix=path.name.split(".")[0],
         )
-        # pdb.set_trace()
-        # data_file = open('data_show.txt', mode='w')
-        # for i in range(512):
-        #     for j in range(512):
-        #         for k in range(313):
-        #             if materials['bone'][i][j][k] != 0:
-        #                 data_file.write(materials['bone'][i][j][k])
 
         return cls(
             data,
@@ -488,14 +479,14 @@ class Volume(object):
         """
         path = Path(path)
         hu_values, header = nrrd.read(path)
-
         if cache_dir is None:
             cache_dir = path.parent
         ijk_from_anatomical = np.concatenate(
             [header["space directions"], header["space origin"].reshape(-1, 1),],
             axis=1,
         )
-
+        print(hu_values.shape)
+        print(hu_values)
         anatomical_from_ijk = np.concatenate(
             [ijk_from_anatomical, [[0, 0, 0, 1]]], axis=0
         )
@@ -673,12 +664,7 @@ class Volume(object):
                 .squeeze(),
             )
         else:
-            self.world_from_anatomical = geo.FrameTransform.from_rt(
-                rotation=Rotation.from_euler("xz", [90, 90], degrees=True)
-                .as_matrix()
-                .squeeze(),
-            )
-            # raise NotImplementedError
+            raise NotImplementedError
 
     def facedown(self):
         """Turns the volume to be face down.
@@ -698,12 +684,7 @@ class Volume(object):
                 .squeeze(),
             )
         else:
-            self.world_from_anatomical = geo.FrameTransform.from_rt(
-                rotation=Rotation.from_euler("xz", [-90, -90], degrees=True)
-                .as_matrix()
-                .squeeze(),
-            )
-            # raise NotImplementedError
+            raise NotImplementedError
 
     def interpolate(self, *x: geo.Point3D, method: str = "linear") -> np.ndarray:
         """Interpolate the value of the volume at the point.
