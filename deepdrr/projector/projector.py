@@ -276,13 +276,10 @@ class Projector(object):
         *camera_projections: geo.CameraProjection,
     ) -> np.ndarray:
         """Perform the projection.
-
         Args:
             camera_projection: any number of camera projections. If none are provided, the Projector uses the CArm device to obtain a camera projection.
-
         Raises:
             ValueError: if no projections are provided and self.carm is None.
-
         Returns:
             np.ndarray: array of DRRs, after mass attenuation, etc.
         """
