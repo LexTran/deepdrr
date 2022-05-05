@@ -22,7 +22,8 @@ log.addHandler(RichHandler())
 log.setLevel(logging.INFO)
 
 def main():
-    output_dir = Path.cwd() / "output"                                # 输出文件夹
+    output_dir = input("请输入输出路径：")                                # 输出文件夹
+    output_dir = Path(output_dir)
     data_dir = input("请输入数据路径：")
     i = 1
     if os.path.isdir(data_dir):
@@ -36,8 +37,8 @@ def main():
             # define the simulated C-arm
             carm = deepdrr.MobileCArm(
                 patient.center_in_world,
-                source_to_detector_distance = 1000,
-                source_to_isocenter_vertical_distance = 500,
+                source_to_detector_distance = 400,
+                source_to_isocenter_vertical_distance = 320,
                 source_to_isocenter_horizontal_offset = 0,
                 free_space = 820,
                 sensor_height = 1536*1.5,
@@ -67,13 +68,13 @@ def main():
         patient = deepdrr.Volume.from_nifti(     
             data_dir, use_thresholding=True
         )                                                                       # 指定输入图像，读取CT容积
-        # patient.faceup()
+        patient.faceup()
 
         # define the simulated C-arm
         carm = deepdrr.MobileCArm(
             patient.center_in_world,
-            source_to_detector_distance = 1000,
-            source_to_isocenter_vertical_distance = 500,
+            source_to_detector_distance = 300,
+            source_to_isocenter_vertical_distance = 240,
             source_to_isocenter_horizontal_offset = 0,
             free_space = 820,
             sensor_height = 1536*1.5,
@@ -85,7 +86,7 @@ def main():
         with Projector(patient, 
             carm=carm,
             step=0.01,
-            spectrum='90KV_AL40', # Options are `'60KV_AL35'`, `'90KV_AL40'`, and `'120KV_AL43'`
+            spectrum='60KV_AL35', # Options are `'60KV_AL35'`, `'90KV_AL40'`, and `'120KV_AL43'`
             photon_count=100000,
             add_noise=True,
             threads=8,
