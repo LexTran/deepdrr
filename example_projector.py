@@ -1,5 +1,6 @@
 #! python3
 
+from genericpath import isfile
 import logging
 import os
 from typing import Callable
@@ -22,35 +23,82 @@ log.setLevel(logging.INFO)
 
 def main():
     output_dir = Path.cwd() / "output"                                # 输出文件夹
-    # data_dir = test_utils.download_sampledata("CTPelvic1K_sample")
+    data_dir = input("请输入数据路径：")
     i = 1
-    for data in os.listdir('G:\CS\DL\datasets\CTPelvic1K_dataset6_data'):
-        patient = deepdrr.Volume.from_nifti(
-            # data_dir / "dataset6_CLINIC_0001_data.nii.gz", use_thresholding=True       
-            r'G:\CS\DL\datasets\CTPelvic1K_dataset6_data\\'+data, use_thresholding=True
+    if os.path.isdir(data_dir):
+        outputname = input("请输入输出序列前缀：")
+        for data in os.listdir(data_dir):
+            patient = deepdrr.Volume.from_nifti(     
+                data_dir + "\\" + data, use_thresholding=True
+            )                                                                       # 指定输入图像，读取CT容积
+            patient.faceup()
+
+            # define the simulated C-arm
+            carm = deepdrr.MobileCArm(
+                patient.center_in_world,
+                source_to_detector_distance = 1000,
+                source_to_isocenter_vertical_distance = 500,
+                source_to_isocenter_horizontal_offset = 0,
+                free_space = 820,
+                sensor_height = 1536*1.5,
+                sensor_width = 1536*1.5,
+                pixel_size = 0.5,
+            )
+            # deepdrr.vis.show(patient, carm, full=[False, True])
+
+            # project in the AP view
+            with Projector(patient, 
+                carm=carm,
+                step=0.01,
+                spectrum='60KV_AL35', # Options are `'60KV_AL35'`, `'90KV_AL40'`, and `'120KV_AL43'`
+                photon_count=100000,
+                add_noise=True,
+                threads=8,
+            ) as projector:
+                #carm.move_to(alpha=0, beta=-15)
+                image = projector()
+
+            path = output_dir / f'{outputname}_{i}.png'
+            image_utils.save(path, image)
+            i += 1
+            log.info(f"saved example projection image to {path.absolute()}")
+    elif os.path.isfile(data_dir):
+        outputname = input("请输入输出名称：")
+        patient = deepdrr.Volume.from_nifti(     
+            data_dir, use_thresholding=True
         )                                                                       # 指定输入图像，读取CT容积
-        patient.faceup()
+        # patient.faceup()
 
         # define the simulated C-arm
-        carm = deepdrr.MobileCArm(patient.center_in_world)
-        # deepdrr.vis.show(patient, carm, full=[False, True])
+        carm = deepdrr.MobileCArm(
+            patient.center_in_world,
+            source_to_detector_distance = 1000,
+            source_to_isocenter_vertical_distance = 500,
+            source_to_isocenter_horizontal_offset = 0,
+            free_space = 820,
+            sensor_height = 1536*1.5,
+            sensor_width = 1536*1.5,
+            pixel_size = 0.5,
+        )
 
         # project in the AP view
         with Projector(patient, 
             carm=carm,
+            step=0.01,
+            spectrum='90KV_AL40', # Options are `'60KV_AL35'`, `'90KV_AL40'`, and `'120KV_AL43'`
             photon_count=100000,
             add_noise=True,
-            # scatter_num=10,
             threads=8,
-            neglog=True,
         ) as projector:
             #carm.move_to(alpha=0, beta=-15)
             image = projector()
 
-        path = output_dir / f'example_projector_{i}.png'
+        path = output_dir / f'{outputname}.png'
         image_utils.save(path, image)
-        i += 1
         log.info(f"saved example projection image to {path.absolute()}")
+    else:
+        raise RuntimeError("Path is not correct!")
+
 
 if __name__ == "__main__":
 # if(os.system("cl.exe")):
